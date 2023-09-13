@@ -14,6 +14,8 @@ public class MyAlarmReceiver extends BroadcastReceiver {
                 "MyAlarmReceiver:Wakelock"
         );
         wakeLock.acquire();
+        MainActivity.onTime = System.currentTimeMillis();
+
         wakeLock.release();
     }
 }

@@ -32,14 +32,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="On후 체크타이밍 : "/>
+            android:text="Off/On Pass Limit : "/>
         <EditText
             android:id="@+id/check_delay"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:inputType="number"
             android:gravity="center"
-            android:text="2000"
+            android:text="7000"
             android:hint="ms"/>
     </LinearLayout>
 
@@ -57,9 +57,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="화면 Off Count : "/>
+            android:text="Trigger Gap(ms) : "/>
         <TextView
-            android:id="@+id/off_count"
+            android:id="@+id/trigger_gap"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#2196F3"
@@ -73,9 +73,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="화면  On Count : "/>
+            android:text="Total Gap(ms) : "/>
         <TextView
-            android:id="@+id/on_count"
+            android:id="@+id/total_gap"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#F44336"

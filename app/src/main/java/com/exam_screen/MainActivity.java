@@ -14,7 +14,6 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.PowerManager;
 import android.os.SystemClock;
 import android.view.View;
 import android.view.WindowManager;
@@ -24,22 +23,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
-
     enum STATUS {IDLE, RUNNING, FAIL};
     public final int ALARM_ID = 1;
-
     public DevicePolicyManager devicePolicyManager;
     public ComponentName componentName;
-    public PowerManager mPowerManager;
     public EditText delayEditText;
     public EditText checkEditText;
     public Button testButton;
-    public TextView offCount;
-    public TextView onCount;
-    public String scriptPath;
+    public TextView totalGap;
+    public TextView triggerGap;
     public boolean testing;
-    public int screenOnCount = 0;
-    public int screenOffCount = 0;
+    public static long offTime;
+    public static long onTime;
+    public static long totalTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,12 +64,9 @@ public class MainActivity extends AppCompatActivity {
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         registerReceiver(screenReceiver, intentFilter);
 
-        /* wakeup power manager 가져오기 */
-        mPowerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-
         /* 앱화면 및 이벤트 설정 */
-        offCount = findViewById(R.id.off_count);
-        onCount = findViewById(R.id.on_count);
+        triggerGap = findViewById(R.id.trigger_gap);
+        totalGap = findViewById(R.id.total_gap);
         delayEditText = findViewById(R.id.delay);
         checkEditText = findViewById(R.id.check_delay);
         testButton = findViewById(R.id.button);
@@ -85,8 +78,6 @@ public class MainActivity extends AppCompatActivity {
                     setButton(STATUS.IDLE);
                 } else {
                     setButton(STATUS.RUNNING);
-                    screenOnCount = 0;
-                    screenOffCount = 0;
                     screenTest();
                 }
             }
@@ -114,7 +105,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void screenTest() {
         // 화면 끄기
+        offTime = System.currentTimeMillis();
         devicePolicyManager.lockNow();
+
         // 화면 켜기
         scheduleAlarm(this, Integer.parseInt(delayEditText.getText().toString()));
     }
@@ -132,26 +125,25 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-                screenOnCount++;
-                
-                new Handler().postDelayed(new Runnable() {  // 화면 켜지고 제테스트 판단
-                    @Override
-                    public void run() {
-                        if (!testing) {
-                            Toast.makeText(context, "테스트를 중지하였습니다.", Toast.LENGTH_SHORT).show();
-                        } else if (screenOnCount == screenOffCount) {
-                            screenTest();
-                        } else {
-                            setButton(STATUS.FAIL);
-                        }
-                    }
-                }, Integer.parseInt(checkEditText.getText().toString()));
+                totalTime = System.currentTimeMillis();
 
+                if (!testing) {
+                    Toast.makeText(context, "테스트를 중지하였습니다.", Toast.LENGTH_SHORT).show();
+                } else if ((totalTime - offTime) <= Integer.parseInt(checkEditText.getText().toString())) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            screenTest();
+                        }
+                    }, 2000);
+                } else {
+                    setButton(STATUS.FAIL);
+                }
             } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-                screenOffCount++;
+                // empty
             }
-            onCount.setText(String.valueOf(screenOnCount));
-            offCount.setText(String.valueOf(screenOffCount));
+            triggerGap.setText(String.valueOf(onTime - offTime));
+            totalGap.setText(String.valueOf(totalTime - offTime));
         }
     };
 }
