@@ -38,6 +38,8 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".MyAlarmReceiver" />
+
     </application>
 
 </manifest>
